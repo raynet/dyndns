@@ -3,9 +3,9 @@ dyndns updater
 
 A small script for sending dynamic DNS updates to a bind 9 server
 
-I've tested this on a Linux Mint 17 machine.  Everything should work
-the same on Ubuntu 14.04.  If you are running a RedHat derivative
-you'll have to figure out how to install the prequisites yourself.
+I've updated this to work on Ubuntu 25.10. If you are running a 
+RedHat derivative you'll have to figure out how to install the 
+prequisites yourself.
 
 Creating a key
 ==============
@@ -80,7 +80,7 @@ readable by the bind user:
 Edit the file to have the following contents, the key material is from
 the K.private file above:
 
-    key "dyndns.example.com" {
+    key "example-key" {
         algorithm hmac-md5;
         secret "jQn+dztU/Yi2xuST/...gbgbCHe5Y2HEljlvNaQ==";
     };
@@ -92,11 +92,14 @@ Add the following to your /etc/bind/named.conf.local:
     zone "dyndns.example.com" {
         type master;
         file "/etc/bind/dyndns/dyndns.example.com.zone";
-        allow-update { key "dyndns.example.com"; };
+        allow-update { key "example-key"; };
     };
 
 The "allow-update" statement tells it that a client which knows the
-key is allowed to update the zone.
+key is allowed to update the zone. NOTE: Bind is now more restrictive
+on these updates and you either must grant subzone updates or list
+subdomain names that can be updated. Will update this later with
+proper example.
 
 Reload the DNS server configuration:
 
@@ -110,7 +113,7 @@ Client configuration
 Install the following packages on the client which wants to send
 dynamic DNS updates to the server:
 
-    apt-get install python-netifaces python-dnspython
+    apt-get install python3-netifaces python3-dnspython
 
 Create a directory where you store the DNS update key and make sure
 only you have access to that directory:
@@ -129,12 +132,12 @@ The client side is now ready.
 Periodically run the update-dyndns script to check the DNS
 information and update it if it has changed.  The syntax is:
 
-    ./update-dyndns.py nameserver zone hostname interface key-file
+    ./update-dyndns.py nameserver keyname zone hostname interface key-file
 
 for example, to ask the nameserver ns.example.com to update
 grumpy.dyndns.example.com with the IP addresses from eth0, do:
 
-    ./update-dyndns.py ns.example.com dyndns.example.com grumpy eth0 ~/keys/dyndns.example.com
+    ./update-dyndns.py ns.example.com example-key dyndns.example.com grumpy eth0 ~/keys/dyndns.example.com
 
 or use cron to do it every minute.  Edit your crontab with:
 
@@ -142,5 +145,5 @@ or use cron to do it every minute.  Edit your crontab with:
 
 and add a line like this:
 
-    * * * * * $HOME/bin/update-dyndns.py ns.example.com dyndns.example.com grumpy eth0 $HOME/keys/dyndns.example.com
+    * * * * * $HOME/bin/update-dyndns.py ns.example.com example-key dyndns.example.com grumpy eth0 $HOME/keys/dyndns.example.com
 
