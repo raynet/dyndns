@@ -93,13 +93,14 @@ Add the following to your /etc/bind/named.conf.local:
         type master;
         file "/etc/bind/dyndns/dyndns.example.com.zone";
         allow-update { key "example-key"; };
+        update-policy {
+                grant example-key. zonesub ANY;
+        };
     };
 
 The "allow-update" statement tells it that a client which knows the
-key is allowed to update the zone. NOTE: Bind is now more restrictive
-on these updates and you either must grant subzone updates or list
-subdomain names that can be updated. Will update this later with
-proper example.
+key is allowed to update the zone. You might need to add the update-policy
+for Bind to allow clients to add any subdomain they want.
 
 Reload the DNS server configuration:
 

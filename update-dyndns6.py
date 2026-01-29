@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 import sys
-from netifaces import ifaddresses, AF_INET
+from netifaces import ifaddresses, AF_INET6
 
 import dns.name
 import dns.message
@@ -27,8 +27,9 @@ def main():
     nameserver_ip = socket.gethostbyname(nameserver)
 
     actual = []
-    for d in ifaddresses(interface).setdefault(AF_INET, []):
+    for d in ifaddresses(interface).setdefault(AF_INET6, []):
         addr = d['addr']
+        addr = addr.split('%', 1)[0]
         actual.append(addr)
     actual.sort()
 
@@ -39,7 +40,7 @@ def main():
     indns = []
     host = dns.name.from_text('%s.%s' % (name, zone))
     
-    request = dns.message.make_query(host, dns.rdatatype.A)
+    request = dns.message.make_query(host, dns.rdatatype.AAAA)
     response = dns.query.tcp(request, nameserver_ip)
 
     for entry in response.answer:
@@ -65,9 +66,9 @@ def main():
 
     keyring = dns.tsigkeyring.from_text({ keyname + '.' : key })
     update = dns.update.Update(zone, keyring = keyring, keyname=keyname + '.', keyalgorithm=dns.tsig.HMAC_SHA512)
-    update.replace(name, 300, 'A', actual[0])
-    #for a in actual[1:]:
-    #    update.add(name, 300, 'A', a)
+    update.replace(name, 300, 'AAAA', actual[0])
+    #for aaaa in actual[1:]:
+    #    update.add(name, 300, 'AAAA', aaaa)
 
     response = dns.query.tcp(update, nameserver_ip)
 
