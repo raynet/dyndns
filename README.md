@@ -133,18 +133,32 @@ The client side is now ready.
 Periodically run the update-dyndns script to check the DNS
 information and update it if it has changed.  The syntax is:
 
-    ./update-dyndns.py nameserver keyname zone hostname interface key-file
+    ./update-dyndns.py --nameserver SERVER --keyname KEY --zone ZONE --name HOSTNAME --interface IFACE --keyfile KEYFILE
 
-for example, to ask the nameserver ns.example.com to update
-grumpy.dyndns.example.com with the IP addresses from eth0, do:
+Options:
 
-    ./update-dyndns.py ns.example.com example-key dyndns.example.com grumpy eth0 ~/keys/dyndns.example.com
+    --nameserver    DNS nameserver hostname or IP
+    --keyname       TSIG key name
+    --zone          DNS zone (e.g. dyndns.example.com)
+    --name          Record name / hostname within the zone
+    --interface     Network interface to get IP from
+    --keyfile       Path to file containing the TSIG key
+    --force         Update even if the address is unchanged (optional)
 
-or use cron to do it every minute.  Edit your crontab with:
+For example, to ask the nameserver ns.example.com to update
+grumpy.dyndns.example.com with the IP address from eth0:
+
+    ./update-dyndns.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --interface eth0 --keyfile ~/keys/dyndns.example.com
+
+For IPv6 (AAAA records), use update-dyndns6.py with the same options:
+
+    ./update-dyndns6.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --interface eth0 --keyfile ~/keys/dyndns.example.com
+
+To run automatically every minute, edit your crontab:
 
     crontab -e
 
-and add a line like this:
+and add a line like:
 
-    * * * * * $HOME/bin/update-dyndns.py ns.example.com example-key dyndns.example.com grumpy eth0 $HOME/keys/dyndns.example.com
+    * * * * * $HOME/bin/update-dyndns.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --interface eth0 --keyfile $HOME/keys/dyndns.example.com
 

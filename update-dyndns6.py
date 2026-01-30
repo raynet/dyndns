@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 from __future__ import print_function
 
+import argparse
 import sys
 from netifaces import ifaddresses, AF_INET6
 
@@ -14,15 +15,25 @@ import dns.tsig
 
 import socket
 
-force = 0
 
 def main():
-    nameserver = sys.argv[1]
-    keyname = sys.argv[2]
-    zone = sys.argv[3]
-    name = sys.argv[4]
-    interface = sys.argv[5]
-    keyfn = sys.argv[6]
+    parser = argparse.ArgumentParser(description='Update DynDNS AAAA record')
+    parser.add_argument('--nameserver', required=True, help='DNS nameserver hostname or IP')
+    parser.add_argument('--keyname', required=True, help='TSIG key name')
+    parser.add_argument('--zone', required=True, help='DNS zone (e.g. foo.bar)')
+    parser.add_argument('--name', required=True, help='Record name (hostname within zone)')
+    parser.add_argument('--interface', required=True, help='Network interface to get IP from')
+    parser.add_argument('--keyfile', required=True, help='Path to file containing TSIG key')
+    parser.add_argument('--force', action='store_true', help='Update even if address unchanged')
+    args = parser.parse_args()
+
+    nameserver = args.nameserver
+    keyname = args.keyname
+    zone = args.zone
+    name = args.name
+    interface = args.interface
+    keyfn = args.keyfile
+    force = args.force
     
     nameserver_ip = socket.gethostbyname(nameserver)
 
