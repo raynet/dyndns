@@ -48,7 +48,7 @@ def main():
             indns.append(str(item))
     indns.sort()
 
-    if actual == indns:
+    if actual[0] == indns[0]:
         if not force:
             return
 
@@ -58,7 +58,7 @@ def main():
         print("IP address address for %s on %s.%s changed" % (
             interface, name, zone))
 
-    print("actual: %s" % actual)
+    print("actual: %s" % actual[0])
     print("in dns: %s" % indns)
 
     with open(keyfn) as f:
