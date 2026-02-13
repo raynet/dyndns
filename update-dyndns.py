@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import sys
 from netifaces import ifaddresses, AF_INET
+import urllib.request
 
 import dns.name
 import dns.message
@@ -22,7 +23,8 @@ def main():
     parser.add_argument('--keyname', required=True, help='TSIG key name')
     parser.add_argument('--zone', required=True, help='DNS zone (e.g. foo.bar)')
     parser.add_argument('--name', required=True, help='Record name (hostname within zone)')
-    parser.add_argument('--interface', required=True, help='Network interface to get IP from')
+    parser.add_argument('--interface', help='Network interface to get IP from')
+    parser.add_argument('--external', action='store_true', help='Use external service to find public IP')
     parser.add_argument('--keyfile', required=True, help='Path to file containing TSIG key')
     parser.add_argument('--force', action='store_true', help='Update even if address unchanged')
     args = parser.parse_args()
@@ -38,10 +40,21 @@ def main():
     nameserver_ip = socket.gethostbyname(nameserver)
 
     actual = []
-    for d in ifaddresses(interface).setdefault(AF_INET, []):
-        addr = d['addr']
-        actual.append(addr)
-    actual.sort()
+    if args.external:
+        interface = "external service"
+        try:
+            with urllib.request.urlopen('https://checkip.amazonaws.com') as f:
+                actual.append(f.read().decode('utf-8').strip())
+        except Exception as e:
+            print("Unable to determine external IP: %s" % e)
+            return
+    elif interface:
+        for d in ifaddresses(interface).setdefault(AF_INET, []):
+            addr = d['addr']
+            actual.append(addr)
+        actual.sort()
+    else:
+        parser.error("You must specify either --interface or --external")
 
     if not actual:
         print("no known addresses, giving up")

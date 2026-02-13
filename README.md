@@ -141,7 +141,8 @@ Options:
     --keyname       TSIG key name
     --zone          DNS zone (e.g. dyndns.example.com)
     --name          Record name / hostname within the zone
-    --interface     Network interface to get IP from
+    --interface     Network interface to get IP from (required unless --external is used)
+    --external      Use external service to find public IP (instead of interface)
     --keyfile       Path to file containing the TSIG key
     --force         Update even if the address is unchanged (optional)
 
@@ -149,6 +150,10 @@ For example, to ask the nameserver ns.example.com to update
 grumpy.dyndns.example.com with the IP address from eth0:
 
     ./update-dyndns.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --interface eth0 --keyfile ~/keys/dyndns.example.com
+
+Or to use an external service to find the public IP (useful behind NAT):
+
+    ./update-dyndns.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --external --keyfile ~/keys/dyndns.example.com
 
 For IPv6 (AAAA records), use update-dyndns6.py with the same options:
 
@@ -161,4 +166,3 @@ To run automatically every minute, edit your crontab:
 and add a line like:
 
     * * * * * $HOME/bin/update-dyndns.py --nameserver ns.example.com --keyname example-key --zone dyndns.example.com --name grumpy --interface eth0 --keyfile $HOME/keys/dyndns.example.com
-
