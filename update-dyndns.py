@@ -71,15 +71,18 @@ def main():
             indns.append(str(item))
     indns.sort()
 
-    if actual[0] == indns[0]:
+    if indns and actual[0] == indns[0]:
         if not force:
             return
 
         print("address not changed, updating anyway")
 
     else:
-        print("IP address address for %s on %s.%s changed" % (
-            interface, name, zone))
+        if not indns:
+            print("DNS record for %s.%s does not exist" % (name, zone))
+        else:
+            print("IP address address for %s on %s.%s changed" % (
+                interface, name, zone))
 
     print("actual: %s" % actual[0])
     print("in dns: %s" % indns)
